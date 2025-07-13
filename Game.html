@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Catch Me If You Can!</title>
+  <style>
+    body {
+      background: #121212;
+      color: #fff;
+      font-family: Arial;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      margin-top: 30px;
+    }
+    #gameArea {
+      position: relative;
+      height: 70vh;
+      margin: 20px;
+      border: 3px dashed #fff;
+      border-radius: 12px;
+    }
+    #target {
+      position: absolute;
+      padding: 10px 20px;
+      background: #e91e63;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #message {
+      font-size: 20px;
+      margin: 10px;
+      color: yellow;
+    }
+    #timer, #scoreBoard {
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 Catch Me If You Can!</h1>
+  <div id="timer">⏱️ Time left: 20s</div>
+  <div id="scoreBoard">🔥 Score: 0 | 🏆 High Score: 0</div>
+  <div id="gameArea">
+    <button id="target">Catch me!</button>
+  </div>
+  <p id="message">Ready... set... CLICK!</p>
+
+  <audio id="clickSound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+  <audio id="failSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+
+  <script>
+    const target = document.getElementById("target");
+    const gameArea = document.getElementById("gameArea");
+    const message = document.getElementById("message");
+    const timerDisplay = document.getElementById("timer");
+    const scoreBoard = document.getElementById("scoreBoard");
+    const clickSound = document.getElementById("clickSound");
+    const failSound = document.getElementById("failSound");
+
+    let score = 0;
+    let highScore = 0;
+    let speed = 1000;
+    let timeLeft = 20;
+    let clickedThisRound = false;
+
+    function randomPosition() {
+      const maxX = gameArea.clientWidth - target.offsetWidth;
+      const maxY = gameArea.clientHeight - target.offsetHeight;
+      const x = Math.floor(Math.random() * maxX);
+      const y = Math.floor(Math.random() * maxY);
+      target.style.left = x + "px";
+      target.style.top = y + "px";
+    }
+
+    function moveButton() {
+      if (timeLeft <= 0) return;
+      randomPosition();
+      setTimeout(() => {
+        if (!clickedThisRound) {
+          message.innerText = "Too slow! 🐌";
+          failSound.play();
+        }
+        clickedThisRound = false;
+        if (timeLeft > 0) moveButton();
+      }, speed);
+    }
+
+    target.onclick = function () {
+      clickedThisRound = true;
+      clickSound.play();
+      score++;
+      highScore = Math.max(highScore, score);
+      message.innerText = `Nice! Score: ${score}`;
+      speed = Math.max(300, speed - 50);
+      scoreBoard.innerText = `🔥 Score: ${score} | 🏆 High Score: ${highScore}`;
+      randomPosition();
+    };
+
+    function startTimer() {
+      const interval = setInterval(() => {
+        timeLeft--;
+        timerDisplay.innerText = `⏱️ Time left: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(interval);
+          target.style.display = "none";
+          message.innerHTML = `<strong>Game Over!</strong> Your score: ${score} <br>😅 Try again!`;
+        }
+      }, 1000);
+    }
+
+    // Start game
+    randomPosition();
+    moveButton();
+    startTimer();
+  </script>
+</body>
+</html>
